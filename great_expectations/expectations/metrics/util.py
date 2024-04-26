@@ -190,6 +190,26 @@ def get_dialect_regex_expression(  # noqa: C901, PLR0911, PLR0912, PLR0915
         pass
 
     try:
+        # Hive
+        # noinspection PyUnresolvedReferences
+        if hasattr(dialect, "HiveDialect"):
+            if positive:
+                return sqlalchemy.BinaryExpression(
+                    column, sqlalchemy.literal(regex), sqlalchemy.custom_op("RLIKE")
+                )
+            else:
+                return sqlalchemy.BinaryExpression(
+                    column,
+                    sqlalchemy.literal(regex),
+                    sqlalchemy.custom_op("NOT RLIKE"),
+                )
+    except (
+        AttributeError,
+        TypeError,
+    ):  # TypeError can occur if the driver was not installed and so is None
+        pass
+
+    try:
         # Clickhouse
         # noinspection PyUnresolvedReferences
         if hasattr(dialect, "ClickHouseDialect") or isinstance(
