@@ -1371,9 +1371,15 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         if isinstance(batch_spec, RuntimeQueryBatchSpec):
             # query != None is already checked when RuntimeQueryBatchSpec is instantiated
             # re-compile the query to include any new parameters
-            compiled_query = selectable.compile(
-                compile_kwargs={"literal_binds": True},
-            )
+            if self.engine.dialect.name == "oracle":
+                compiled_query = selectable.compile(
+                    compile_kwargs={"literal_binds": True},
+                )
+            else:
+                compiled_query = selectable.compile(
+                    dialect=self.engine.dialect,
+                    compile_kwargs={"literal_binds": True},
+                )
             query_str = str(compiled_query)
             batch_data = SqlAlchemyBatchData(
                 execution_engine=self,
